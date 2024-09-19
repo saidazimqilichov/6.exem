@@ -1,0 +1,763 @@
+definitions:
+  budget.BudgetID:
+    properties:
+      id:
+        type: string
+    type: object
+  budget.BudgetInfo:
+    properties:
+      amount:
+        type: number
+      category:
+        type: string
+      currency:
+        type: string
+      spent:
+        type: number
+    type: object
+  budget.BudgetResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  budget.BudgetUpdate:
+    properties:
+      amount:
+        type: number
+      id:
+        type: string
+    type: object
+  budget.BudgetWithID:
+    properties:
+      amount:
+        type: number
+      category:
+        type: string
+      currency:
+        type: string
+      id:
+        type: string
+      spent:
+        type: number
+    type: object
+  handler.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  income.ListTransactions:
+    properties:
+      listTransactions:
+        items:
+          $ref: '#/definitions/income.TransactionWithID'
+        type: array
+    type: object
+  income.TransactionDate:
+    properties:
+      end:
+        type: string
+      start:
+        type: string
+      type:
+        type: string
+    type: object
+  income.TransactionID:
+    properties:
+      id:
+        type: string
+    type: object
+  income.TransactionInfo:
+    properties:
+      amount:
+        type: number
+      category:
+        type: string
+      currency:
+        type: string
+      type:
+        type: string
+    type: object
+  income.TransactionWithID:
+    properties:
+      amount:
+        type: number
+      category:
+        type: string
+      currency:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      type:
+        type: string
+    type: object
+  model.NewPass:
+    properties:
+      code:
+        type: integer
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  model.UserCode:
+    properties:
+      code:
+        type: integer
+      email:
+        type: string
+    type: object
+  notification.Notify:
+    properties:
+      date:
+        type: string
+      message:
+        type: string
+      report:
+        $ref: '#/definitions/notification.Report'
+      user_id:
+        type: string
+    type: object
+  notification.NotifyList:
+    properties:
+      notifyList:
+        items:
+          $ref: '#/definitions/notification.Notify'
+        type: array
+    type: object
+  notification.Report:
+    properties:
+      expenses:
+        type: number
+      income:
+        type: number
+      netSavings:
+        type: number
+    type: object
+  report.Budget:
+    properties:
+      remainingBudget:
+        type: number
+      totalAmount:
+        type: number
+      totalSpent:
+        type: number
+    type: object
+  report.ReportResponse:
+    properties:
+      budget:
+        $ref: '#/definitions/report.Budget'
+      expenses:
+        type: number
+      income:
+        type: number
+      netSavings:
+        type: number
+    type: object
+  users.UserID:
+    properties:
+      id:
+        type: string
+    type: object
+  users.UserInfo:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  users.UserLogin:
+    properties:
+      id:
+        type: string
+      password:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This swagger UI was created to manage personal finance
+  title: PERSONAL FINANCE MANAGEMENT
+  version: "1.0"
+paths:
+  /api/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: This method retrieves a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User data retrieved successfully
+          schema:
+            $ref: '#/definitions/users.UserInfo'
+        "400":
+          description: Error while retrieving user
+          schema: {}
+        "403":
+          description: Permission Denied
+          schema: {}
+      summary: Get user by ID
+      tags:
+      - USERS
+  /api/users/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: This method is responsible for sending a password reset code to
+        the user's email
+      parameters:
+      - description: User ID for reset
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserID'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Code sent to your email
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Error retrieving email
+          schema: {}
+        "403":
+          description: Permission Denied
+          schema: {}
+        "500":
+          description: Error storing reset code or sending email
+          schema: {}
+      summary: Request password reset
+      tags:
+      - USERS
+  /api/users/login:
+    post:
+      consumes:
+      - application/json
+      description: This method is responsible for user login
+      parameters:
+      - description: User login details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful with token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Error while unmarshaling
+          schema: {}
+        "401":
+          description: Invalid username or password
+          schema: {}
+        "403":
+          description: Permission Denied
+          schema: {}
+      summary: User login
+      tags:
+      - USERS
+  /api/users/logout:
+    post:
+      consumes:
+      - application/json
+      description: This method is responsible for logging out the user
+      parameters:
+      - description: User ID for logout
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserID'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'Error while Logginf out user '
+          schema: {}
+        "403":
+          description: Permission Denied
+          schema: {}
+      summary: User logout
+      tags:
+      - USERS
+  /api/users/register:
+    post:
+      consumes:
+      - application/json
+      description: This method is responsible for registering new users
+      parameters:
+      - description: User registration details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserInfo'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Invalid request body or error unmarshaling
+          schema: {}
+        "403":
+          description: Permission Denied
+          schema: {}
+        "500":
+          description: Error storing user data or sending confirmation email
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Register a new user
+      tags:
+      - USERS
+  /api/users/update-password:
+    post:
+      consumes:
+      - application/json
+      description: This method is responsible for updating the user's password
+      parameters:
+      - description: New password details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.NewPass'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password updated successfully
+          schema:
+            $ref: '#/definitions/users.UserInfo'
+        "400":
+          description: Invalid input or user verification error
+          schema: {}
+        "403":
+          description: Permission Denied
+          schema: {}
+        "500":
+          description: Error while updating password
+          schema: {}
+      summary: Update user password
+      tags:
+      - USERS
+  /api/users/verification:
+    post:
+      consumes:
+      - application/json
+      description: This method is responsible for verifying the user registration
+        code
+      parameters:
+      - description: User code details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserCode'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/users.UserInfo'
+        "400":
+          description: Error verifying code
+          schema: {}
+        "500":
+          description: Error creating user or sending welcome email
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Verify user registration code
+      tags:
+      - USERS
+  /budgets:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all budgets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/budget.BudgetWithID'
+        "500":
+          description: Unable to retrieve budgets
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all budgets
+      tags:
+      - budget
+    post:
+      consumes:
+      - application/json
+      description: Create a new budget with the provided information
+      parameters:
+      - description: Create Budget
+        in: body
+        name: budget
+        required: true
+        schema:
+          $ref: '#/definitions/budget.BudgetInfo'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/budget.BudgetID'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Unable to create budget
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new budget
+      tags:
+      - budget
+  /budgets/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a budget by its ID
+      parameters:
+      - description: Budget ID
+        in: body
+        name: budget
+        required: true
+        schema:
+          $ref: '#/definitions/budget.BudgetID'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/budget.BudgetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Unable to delete budget
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a budget by ID
+      tags:
+      - budget
+  /budgets/update:
+    put:
+      consumes:
+      - application/json
+      description: Update the budget amount for a specific budget
+      parameters:
+      - description: Update Budget Amount
+        in: body
+        name: budget
+        required: true
+        schema:
+          $ref: '#/definitions/budget.BudgetUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/budget.BudgetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Unable to update budget
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update the budget amount
+      tags:
+      - budget
+  /notifications:
+    get:
+      description: Retrieve a list of all notifications
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of notifications
+          schema:
+            items:
+              $ref: '#/definitions/notification.NotifyList'
+            type: array
+        "500":
+          description: Unable to get notification
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get all notifications
+      tags:
+      - notifications
+  /notifications/unread:
+    get:
+      description: Retrieve a list of unread notifications
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of unread notifications
+          schema:
+            items:
+              $ref: '#/definitions/notification.NotifyList'
+            type: array
+        "500":
+          description: Unable to get notification
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get unread notifications
+      tags:
+      - notifications
+  /reports:
+    get:
+      description: Retrieve the report based on the provided criteria
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Report details
+          schema:
+            $ref: '#/definitions/report.ReportResponse'
+        "500":
+          description: Unable to get report
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get report
+      tags:
+      - reports
+  /transactions:
+    post:
+      consumes:
+      - application/json
+      description: Create a new income transaction
+      parameters:
+      - description: Transaction info
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/income.TransactionInfo'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/income.TransactionID'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new transaction
+      tags:
+      - transactions
+    put:
+      consumes:
+      - application/json
+      description: Update an existing transaction by ID
+      parameters:
+      - description: Transaction with ID
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/income.TransactionWithID'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/income.TransactionID'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a transaction by ID
+      tags:
+      - transactions
+  /transactions/{id}:
+    delete:
+      description: Delete a transaction by its ID
+      parameters:
+      - description: Transaction ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/income.TransactionID'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a transaction by ID
+      tags:
+      - transactions
+    get:
+      description: Retrieve a transaction by its ID
+      parameters:
+      - description: Transaction ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/income.TransactionWithID'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a transaction by ID
+      tags:
+      - transactions
+  /transactions/category/{category}:
+    get:
+      description: Retrieve transactions based on a specific category
+      parameters:
+      - description: Transaction Category
+        in: path
+        name: category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/income.ListTransactions'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get transactions by category
+      tags:
+      - transactions
+  /transactions/date:
+    post:
+      consumes:
+      - application/json
+      description: Retrieve transactions based on a specific date
+      parameters:
+      - description: Transaction date
+        in: body
+        name: date
+        required: true
+        schema:
+          $ref: '#/definitions/income.TransactionDate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/income.ListTransactions'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get transactions by date
+      tags:
+      - transactions
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
